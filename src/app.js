@@ -7,6 +7,8 @@ const { NODE_ENV } = require('./config')
 const app = express()
 const TR = require('./notebookRouter/tab-router');
 const NR = require('./notebookRouter/note-router');
+const setup = require('./notebookRouter/setup-router');
+const UR = require('./notebookRouter/user-router');
 const knex = require('knex');
 
 db = knex({
@@ -24,7 +26,9 @@ app.use(helmet())
 app.use(cors())
 
 app.use('/note', NR);
-app.use('/', TR);
+app.use('/setup', setup);
+app.use('/game', TR);
+app.use('/user', UR);
 
 
 app.use(function errorHandler(error, req, res, next) {

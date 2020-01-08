@@ -1,6 +1,7 @@
 const app = require('../src/app')
 const knex = require('knex');
 const setup = require('./make-content');
+const TS = require('../src/notebookRouter/tab-service');
 
 
 
@@ -30,6 +31,7 @@ describe('App', () => {
   after('remove connection', () => {
     return db.destroy();
   })
+  
   context('with no data in the database', () => {
     it('GET / responds with 200 and an empty array', () => {
       return supertest(app)
@@ -79,14 +81,13 @@ describe('App', () => {
       return supertest(app)
         .post('/')
         .send({
-          id: '1',
           users_id: '1', 
           gamename: 'bleh',
         })
         .expect(201, newGame)
     })
 
-    it.only('POST /:game_id/:tab_id responds with 201 and an the new note', () =>{
+    it('POST /:game_id/:tab_id responds with 201 and an the new note', () =>{
       const newNote =  {
         id: 1,
         game_id: 1, 
@@ -98,7 +99,6 @@ describe('App', () => {
       return supertest(app)
         .post('/1/1')
         .send({
-          id: '1',
           tab_id: '1',
           game_id: '1', 
           title: 'bleh',
@@ -106,5 +106,10 @@ describe('App', () => {
         })
         .expect(201, newNote);
     })
+  })
+
+  it.only('does the thing', () =>{
+      console.log(TS.confirmTabExists(db, 6))
+      
   })
 })

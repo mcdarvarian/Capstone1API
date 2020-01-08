@@ -7,9 +7,20 @@ const NotebookService = {
         return db.select('*').from('games').where('id', id).first();
     },
 
-    getTabNotes(db, tab_id){
+    getNotesByGameAndTab(db, game_id, tab_id){
+        return db.select('*').from('notes').where({tab_id: tab_id, game_id: game_id});
+    },
 
+    getNotesByGame(db, game_id){
+        return db.select('*').from('notes').where('game_id', game_id);
+    },
+
+    getNotesByTab(db, tab_id){
         return db.select('*').from('notes').where('tab_id', tab_id);
+    },
+
+    getTabs(db){
+        return db.select('*').from('tabs');
     },
 
     makeNote(db, newNote){
@@ -22,6 +33,10 @@ const NotebookService = {
         return db.insert(newGame).into('games').returning('*').then(rows =>{
             return rows[0];
         })
+    },
+
+    deleteGame(db, id){
+        return db('games').where('id', id).del()
     }
 
     
