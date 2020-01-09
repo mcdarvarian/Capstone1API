@@ -1,11 +1,11 @@
 const NotebookService = {
 
-    getAllNotes(db){
+    getAllNotes(db){ 
         return db.select('*').from('notes');
     },
 
     getNoteById(db, id) {
-        return db.select('*').from('notes').where('id', id).first();
+        return db.select('*').from('notes').where({id: id}).first();
     },
 
     updateNotebyId(db, id, newNote){

@@ -129,13 +129,40 @@ describe('App', () => {
     })
   })
 
-  context.only('the /note route', () => {
+  context('the /note route', () => {
     context('no data in notes/games/users database', () => {
+      it('GET /note/ returns 404', () => {
+        return supertest(app)
+          .get('/note/')
+          .expect(404)
+      })
+
+      it('GET /note/:id when note doesnt exist returns 404', () => {
+        return supertest(app)
+          .get('/note/1')
+          .expect(404)
+      })
+
+      it('PATCH /note/:id when note doesnt exist returns 404', () => {
+        return supertest(app)
+          .patch('/note/1')
+          .send({
+            title: 'f',
+            contents: 'f'
+          })
+          .expect(404)
+      })
+
+      it('DELETE /note/:id when note doesnt exist returns 404', () => {
+        return supertest(app)
+          .get('/note/1')
+          .expect(404)
+      })
 
     })
 
     context('data in notes/games/users database', () => {
-      beforeEach('put stuff in', () => {
+      before('put stuff in', () => {
         Promise.all([
           db('users').insert(testUsers),
           db('games').insert(testGames),
@@ -143,16 +170,38 @@ describe('App', () => {
         ])
       })
 
-      afterEach('clear tables', () => {
+      after('clear tables', () => {
         return db.raw(
           'TRUNCATE users RESTART IDENTITY CASCADE;'
         );
       })
 
-      it('GET /note/ returns all notes',() =>{
+      it('GET /note/ returns 200 and all notes', () => {
         return supertest(app)
-        .get('/note/')
-        .expect(200, testNotes)
+          .get('/note/')
+          .expect(200, testNotes)
+      })
+
+      it('GET /note/:id returns 200 and note', () => {
+        return supertest(app)
+          .get('/note/1')
+          .expect(200, testNotes[0])
+      })
+
+      it('PATCH /note/:id when note doesnt exist returns 404', () => {
+        return supertest(app)
+          .patch('/note/1')
+          .send({
+            title: 'fine',
+            contents: 'f'
+          })
+          .expect(202, { id: 1, title: 'fine', contents: 'f' })
+      })
+
+      it('DELETE /note/:id when note does exist returns 204', () => {
+        return supertest(app)
+          .delete('/note/1')
+          .expect(204, {})
       })
     })
   })
@@ -165,7 +214,62 @@ describe('App', () => {
 
   context('the /game route', () => {
     context('no data in games/users database', () => {
-      beforeEach('put stuff in', () => {
+      it('GET /game/ returns 200 and empty set', () => {
+        return supertest(app)
+          .get('/game')
+          .expect(200, []);
+      })
+      it('POST /game/ returns 400 bad request', () => {
+        return supertest(app)
+          .post('/game')
+          .set(
+            'authorization', `basic ZGFpc3k6YmxlaA==`
+          )
+          .send({
+            gamename: 'test'
+          })
+          .expect(400);
+      })
+
+      it('GET /game/notes/:game_id returns 404', () => {
+        return supertest(app)
+          .get('/game/notes/1')
+          .expect(404);
+      })
+
+      it('GET /game/:game_id returns 404 when no data exists', () => {
+        return supertest(app)
+          .get('/game/1')
+          .expect(404);
+      })
+
+      it('DELETE /game/:game_id returns 404 when no data exists', () => {
+        return supertest(app)
+          .delete('/game/1')
+          .expect(404);
+      })
+
+      it('GET /:game_id/:tab_id returns 404 when no data exists', () => {
+        return supertest(app)
+          .get('/game/1/1')
+          .expect(404);
+      })
+
+      it('POST /:game_id/:tab_id returns 404 when no data exists', () => {
+        return supertest(app)
+          .get('/game/1/1')
+          .send({
+            tab_id: 1,
+            game_id: 1,
+            title: 'f',
+            contents: 'f'
+          })
+          .expect(404);
+      })
+    })
+
+    context.only('data in games/users database', () => {
+      before('put stuff in', () => {
         Promise.all([
           db('users').insert(testUsers),
           db('games').insert(testGames),
@@ -173,98 +277,97 @@ describe('App', () => {
         ])
       })
 
-      afterEach('clear tables', () => {
+      after('clear tables', () => {
         return db.raw(
           'TRUNCATE users RESTART IDENTITY CASCADE;'
         );
       })
-    })
 
-    context('data in games/users database', () => {
+      it('GET /game/ returns 200 and all games', () => {
+        let x = 1;
+        const resGames = testGames.map(game => {
+          game.id = x;
+          x++;
+          return game;
+        })
+        return supertest(app)
+          .get('/game')
+          .expect(200, testGames);
+      })
+
+      it('POST /game/ returns 201 and the game', () => {
+        return supertest(app)
+          .post('/game/')
+          .set(
+            'authorization', `basic ZGFpc3k6YmxlaA==`
+          )
+          .send({
+            gamename: 'test'
+          })
+          .expect(201, { gamename: 'test', id: 7, users_id: 1 });
+      })
+
+      it('GET /game/notes/:game_id returns all notes with game_id of 2', () => {
+        return supertest(app)
+          .get('/game/notes/2')
+          .expect(200, [{
+            id: 2,
+            game_id: 2,
+            tab_id: 1,
+            title: 'bleh',
+            contents: 'bleh 2: the blehing'
+          },
+          {
+            id: 5,
+            game_id: 2,
+            tab_id: 5,
+            title: 'bleh',
+            contents: 'bleh 2: the blehing'
+          }]);
+      })
+
+      it('GET /game/:game_id returns 200 and notes with game_id=1 and tab_id=1', () => {
+        return supertest(app)
+          .get('/game/1')
+          .expect(200, [{
+            id: 1,
+            game_id: 1,
+            tab_id: 1,
+            title: 'bleh',
+            contents: 'bleh 2: the blehing'
+          }]);
+      })
+
+     /* it('DELETE /game/:game_id returns 204 the game exists', () => {
+        return supertest(app)
+          .delete('/game/1')
+          .expect(204, {});
+      })
+
+      it('GET /:game_id/:tab_id returns 404 when no data exists', () => {
+        return supertest(app)
+          .get('/game/1/1')
+          .expect(200, [{
+            id: 1,
+            game_id: 1,
+            tab_id: 1,
+            title: 'bleh',
+            contents: 'bleh 2: the blehing'
+          }]);
+      })*/
+
+      it('POST /:game_id/:tab_id returns 201 when no data exists', () => {
+        return supertest(app)
+          .post('/game/1/1')
+          .send({
+            tab_id: 1,
+            game_id: 1,
+            title: 'f',
+            contents: 'f'
+          })
+          .expect(201, { id: 6, game_id: 1, tab_id: 1, title: 'f', contents: 'f' });
+      })
 
     })
   })
-
-  /*context('with no data in the database', () => {
-    it('GET / responds with 200 and an empty array', () => {
-      return supertest(app)
-        .get('/', {
-          'authorization': `basic ${TokenService.getAuthToken()}`
-        })
-        .expect(200, [])
-    })
-
-    it('GET /:game_id responds with 404 and game not found', () => {
-      return supertest(app)
-        .get('/1')
-        .expect(404, 'game not found')
-    })
-
-    it('GET /game_id/tab_id responds with 404 and game not found', () => {
-      return supertest(app)
-        .get('/1/1')
-        .expect(404, 'game not found');
-    })
-
-    it('GET /note/:note_id response with 404 and note not found', () =>{
-      console.log('trying');
-      return supertest(app)
-        .get('/note/1')
-        .expect(404, 'note not found');
-    })
-
-    
-    
-  })
-  context('with data in the database', () =>{
-    beforeEach(() =>{
-      return db.insert(testNotes).into('notes').returning('*').then(rows =>{ console.log('rows: ', rows)})
-  })
-
-    afterEach('empty the database (except tabs)', () =>{
-      return db('notes').truncate();
-      
-    })
-    
-    it('POST / inserts the game and returns it properly', () =>{
-      const newGame =  {
-        id: 1,
-        users_id: 1, 
-        gamename: 'bleh',
-      }
-
-      return supertest(app)
-        .post('/')
-        .send({
-          users_id: '1', 
-          gamename: 'bleh',
-        })
-        .expect(201, newGame)
-    })
-
-    it('POST /:game_id/:tab_id responds with 201 and an the new note', () =>{
-      const newNote =  {
-        id: 1,
-        game_id: 1, 
-        tab_id: 1,
-        title: 'bleh',
-        contents: 'bleh',
-      }
-
-      return supertest(app)
-        .post('/1/1')
-        .send({
-          tab_id: '1',
-          game_id: '1', 
-          title: 'bleh',
-          contents: 'bleh',
-        })
-        .expect(201, newNote);
-    })
-  })*/
-
-  /*it('does the thing', () =>{
-      console.log(TS.confirmTabExists(db, 6))
-      
-  })*/
 })

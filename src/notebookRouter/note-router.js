@@ -28,12 +28,14 @@ notebookRouter
     .get((req, res) =>{
         NS.getAllNotes(req.app.get('db'))
             .then(notes =>{
-                if(!notes){
-                    logger.error(`no notes exist`)
+                //  console.log(notes);
+                if(notes.length === 0){
+                    //logger.error(`no notes exist`)
                     res.status(404).send('no notes');
-                }
+                } else {
                 safeNotes = notes.map(note => SanitizeNote(note));
                 res.json(safeNotes);
+                }
             })
     })
 
@@ -43,14 +45,17 @@ notebookRouter
     //.all(requireAuth)
     .get((req, res)  =>{
         const {note_id} = req.params;
+        //console.log(note_id)
         NS.getNoteById(req.app.get('db'), note_id)
         .then(note =>{
             if(!note){
-                logger.error(`note with id ${note_id} not found`)
+                //logger.error(`note with id ${note_id} not found`)
                 res.status(404).send('note not found');
+            }else {
+                res.json(SanitizeNote(note));
             }
         
-            res.json(SanitizeNote(note));
+            
         })
     })
     //this route lets you update a note with whatever information you want
@@ -58,12 +63,16 @@ notebookRouter
         let {note_id} = req.params;
         let {  title, contents } = req.body;
         if(!note_id || !title || !contents){
-            logger.error('update missing required fields');
+            //logger.error('update missing required fields');
             res.status(400).send('bad update');
         } else {
             
             NS.getNoteById(req.app.get('db'), note_id)
             .then(note1 =>{
+                if(!note1){
+                    //logger.error(`note with id ${note_id} not found`)
+                    res.status(404).send('note not found');
+                }else {
                 const newNote= {game_id: note1.game_id, tab_id: note1.tab_id, title, contents}
                 NS.updateNotebyId(req.app.get('db'), note_id, newNote )
                 .then(note =>{
@@ -71,9 +80,11 @@ notebookRouter
                         logger.error(`note with ${id} not found`);
                         res.status(400).send('not found')
                     } else {
-                        res.status(202).json(SanitizeNote(note));
+                        //res.status(202).json(note[0]);
+                        res.status(202).json(SanitizeNote(note[0]));
                     }
                 })
+            }
             })
             
         }
@@ -84,9 +95,10 @@ notebookRouter
         const {note_id} = req.params;
         NS.deleteNote(req.app.get('db'), note_id)
             .then(note =>{
+                console.log(note);
                 if(!note){
                     logger.error(`note with id ${note_id} not found`);
-                    res.status(400).send('not found');
+                    res.status(404).send('not found');
                 } else {
                     res.status(204).json(note);
                 }

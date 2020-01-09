@@ -6,12 +6,12 @@ values
 
 INSERT INTO games(users_id, gameName)
 values
-    (2, 'one'),
-    (2, 'two'),
-    (3, 'three'),
-    (3, 'four'),
-    (4, '5'),
-    (4, 'g');
+    (1, 'one'),
+    (1, 'two'),
+    (2, 'three'),
+    (2, 'four'),
+    (3, '5'),
+    (3, 'g');
 
 INSERT INTO notes(game_id, tab_id, title, contents)
 values

@@ -4,7 +4,7 @@ const NotebookService = {
     },
 
     getGamebyId(db, id){
-        return db.select('*').from('games').where('id', id).first();
+        return db.select('*').from('games').where({id: id}).first();
     },
 
     getNotesByGameAndTab(db, game_id, tab_id){
