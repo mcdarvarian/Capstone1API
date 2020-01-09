@@ -14,7 +14,7 @@ describe('App', () => {
   before('set up connection', () => {
     db = knex({
       client: 'pg',
-      connection: process.env.DB_URL
+      connection: process.env.TEST_DATABASE_URL
     });
     app.set('db', db);
   });
@@ -24,15 +24,11 @@ describe('App', () => {
 
   })
 
-  before(() =>{
-    db.raw(
-      'TRUNCATE games, users RESTART IDENTITY CASCADE'
+  before(() => {
+    return db.raw(
+      'TRUNCATE users RESTART IDENTITY CASCADE;'
     )
   });
-/*
-  before(() =>{
-    return db('users').truncate();
-  })*/
 
   after('remove connection', () => {
     return db.destroy();
@@ -40,35 +36,124 @@ describe('App', () => {
 
   context('the /user route', () => {
     context('no data in users database', () => {
-      it('GET /user/login' , () =>{
+      it('GET /user/login', () => {
         return supertest(app)
           .get('/user/login')
           .expect(404);
       })
 
-      it('POST /user/signup', () =>{
+      it('POST /user/signup', () => {
         return supertest(app)
           .post('/user/signUp')
           .set(
-            
-                'authorization', `basic ZGFpc3k6YmxlaA==`
-            
-        ).expect(201,  { id: 2, username: 'daisy', password: 'bleh' })
+            'authorization', `basic ZGFpc3k6YmxlaA==`
+          )
+          .expect(201, { id: 1, username: 'daisy', password: 'bleh' })
       })
     })
 
     context('data in users database', () => {
+      beforeEach('put users in', () => {
+        return db('users').insert(testUsers)
+      })
 
+      afterEach('clear Users', () => {
+        return db.raw(
+          'TRUNCATE users RESTART IDENTITY CASCADE;'
+        );
+      })
+
+      it('GET /user/login with correct info returns 200 and user', () => {
+        return supertest(app)
+          .get('/user/login')
+          .set(
+            'authorization', `basic ZGFpc3k6YmxlaA==`
+          )
+          .expect(200, { id: 1, username: 'daisy', password: 'bleh' })
+      })
+
+
+      it('POST /user/signup with dup username returns 401', () => {
+        //console.log('start')
+        return supertest(app)
+          .post('/user/signUp')
+          .set(
+            'authorization', `basic ZGFpc3k6YmxlaA==`
+          )
+          .expect(401)
+      })
+
+      it('DELETE /user/admin with correct creds returns 204 and the user', () => {
+        return supertest(app)
+          .delete('/user/admin')
+          .send({
+            username: 'daisy',
+            password: 'bleh',
+            admin_key: 'SW1EYWlzeQ=='
+          }).expect(204, {})
+      })
+
+      it('DELETE /user/admin with incorrect creds returns 401', () => {
+        return supertest(app)
+          .delete('/user/admin')
+          .send({
+            username: 'daisy',
+            password: 'bff',
+            admin_key: 'SW1EYWlzeQ=='
+          }).expect(401)
+      })
+
+      it('PATCH /user/admin with correct creds returns 204 and user', () => {
+        return supertest(app)
+          .patch('/user/admin')
+          .send({
+            old_username: 'daisy',
+            new_username: 'dais',
+            new_password: 'bleh',
+            admin_key: 'SW1EYWlzeQ=='
+          })
+          .expect(204, {})
+      })
+
+      it('PATCH /user/admin with incorrect creds returns 401', () => {
+        return supertest(app)
+          .patch('/user/admin')
+          .send({
+            old_username: 'day',
+            new_username: 'dais',
+            new_password: 'bleh',
+            admin_key: 'SW1EYWlzeQ=='
+          })
+          .expect(401)
+      })
     })
   })
 
-  context('the /note route', () => {
+  context.only('the /note route', () => {
     context('no data in notes/games/users database', () => {
 
     })
 
     context('data in notes/games/users database', () => {
+      beforeEach('put stuff in', () => {
+        Promise.all([
+          db('users').insert(testUsers),
+          db('games').insert(testGames),
+          db('notes').insert(testNotes)
+        ])
+      })
 
+      afterEach('clear tables', () => {
+        return db.raw(
+          'TRUNCATE users RESTART IDENTITY CASCADE;'
+        );
+      })
+
+      it('GET /note/ returns all notes',() =>{
+        return supertest(app)
+        .get('/note/')
+        .expect(200, testNotes)
+      })
     })
   })
 
@@ -80,7 +165,19 @@ describe('App', () => {
 
   context('the /game route', () => {
     context('no data in games/users database', () => {
+      beforeEach('put stuff in', () => {
+        Promise.all([
+          db('users').insert(testUsers),
+          db('games').insert(testGames),
+          db('notes').insert(testNotes)
+        ])
+      })
 
+      afterEach('clear tables', () => {
+        return db.raw(
+          'TRUNCATE users RESTART IDENTITY CASCADE;'
+        );
+      })
     })
 
     context('data in games/users database', () => {

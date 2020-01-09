@@ -19,7 +19,7 @@ function SanitizeNote(note){
         title: xss(note.title),
         contents: xss(note.contents)
     })
-}
+} 
 
 //route to get all notes
 notebookRouter

@@ -1,32 +1,32 @@
 function makeUsers() {
     return [ 
         {
-            id: 5,
-            username: 'one', 
+            //id: 1,
+            username: 'daisy', 
             password: 'bleh'
         },
         {
-            id: 6,
+           // id: 6,
             username: 'two', 
             password: 'bleh'
         },
         {
-            id: 7,
+            //id: 7,
             username: 'three', 
             password: 'bleh'
         },
         {
-            id: 8,
+            //id: 8,
             username: 'four', 
             password: 'bleh'
         },
         {
-            id: 9,
+            //id: 9,
             username: 'five ', 
             password: 'bleh'
         },
         {
-            id: 10,
+            //id: 10,
             username: 'six', 
             password: 'bleh'
         },
@@ -36,28 +36,28 @@ function makeUsers() {
 function makeGames() {
     return [
         {
-            user_id: 1, 
-            gameName: 'one'
+            users_id: 1, 
+            gamename: 'one'
         },
         {
-            user_id: 2, 
-            gameName: 'two'
+            users_id: 2, 
+            gamename: 'two'
         },
         {
-            user_id: 3, 
-            gameName: 'three'
+            users_id: 3, 
+            gamename: 'three'
         },
         {
-            user_id: 1, 
-            gameName: 'four'
+            users_id: 1, 
+            gamename: 'four'
         },
         {
-            user_id: 2, 
-            gameName: 'five'
+            users_id: 2, 
+            gamename: 'five'
         },
         {
-            user_id: 3, 
-            gameName: 'six'
+            users_id: 3, 
+            gamename: 'six'
         },
     ]
 }
@@ -65,34 +65,39 @@ function makeGames() {
 function makeNotes() {
     return [
         {
+            id: 1,
             game_id: 1, 
             tab_id: 1,
             title: 'bleh',
-            content: 'bleh 2: the blehing'
+            contents: 'bleh 2: the blehing'
         },
         {
+            id: 2,
             game_id: 2, 
             tab_id: 1,
             title: 'bleh',
-            content: 'bleh 2: the blehing'
+            contents: 'bleh 2: the blehing'
         },
         {
+            id: 3,
             game_id: 3, 
             tab_id: 2,
             title: 'bleh',
-            content: 'bleh 2: the blehing'
+            contents: 'bleh 2: the blehing'
         },
         {
+            id: 4,
             game_id: 1, 
             tab_id: 2,
             title: 'bleh',
-            content: 'bleh 2: the blehing'
+            contents: 'bleh 2: the blehing'
         },
         {
+            id: 5,
             game_id: 2, 
             tab_id: 5,
             title: 'bleh',
-            content: 'bleh 2: the blehing'
+            contents: 'bleh 2: the blehing'
         },
     ]
 }

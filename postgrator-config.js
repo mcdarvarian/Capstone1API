@@ -3,6 +3,6 @@ require('dotenv').config();
 module.exports = {
   "migrationsDirectory": "migrations",
   "driver": "pg",
-  "connectionString": process.env.DATABASE_URL,
+  "connectionString": process.env.TEST_DATABASE_URL, //change this to DATABASE_URL
   "ssl": !!process.env.SSL,
 }

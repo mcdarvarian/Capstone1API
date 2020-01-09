@@ -1,4 +1,5 @@
 const NotebookService = {
+
     loginUser(db, username, password){
         return db('users').select('*').where({username: username, password: password}).first();
     },
@@ -10,6 +11,7 @@ const NotebookService = {
     },
 
     findUserByName(db, username){
+        //console.log(username);
         return db('users').select('*').where({username: username}).first();
     },
 

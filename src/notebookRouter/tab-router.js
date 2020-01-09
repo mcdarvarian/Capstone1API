@@ -33,6 +33,7 @@ notebookRouter
     })
     //this route makes a new game in the database
     .post(bodyParser, (req, res, next) => {
+        
         let token = req.get('authorization');
         token = token.slice('basic '.length, token.length)
         const [tokenUserName, tokenPassword] = Buffer
