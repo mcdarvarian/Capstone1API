@@ -14,7 +14,7 @@ const knex = require('knex');
 db = knex({
     client: 'pg',
     connection: process.env.DB_URL
-  });
+});
 app.set('db', db);
 
 const morganOption = (NODE_ENV === 'production')
@@ -24,6 +24,17 @@ const morganOption = (NODE_ENV === 'production')
 app.use(morgan(morganOption))
 app.use(helmet())
 app.use(cors())
+
+app.use((error, req, res, next) => {
+    let response
+    if (process.env.NODE_ENV === 'production') {
+        response = { error: { message: 'server error' } }
+    } else {
+        response = { error }
+    }
+    res.status(500).json(response)
+})
+
 
 app.use('/note', NR);
 app.use('/setup', setup);

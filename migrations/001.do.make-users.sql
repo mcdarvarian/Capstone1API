@@ -4,6 +4,6 @@ CREATE TABLE users (
     password TEXT NOT NULL
 );
 
-INSERT INTO users(username, password)
+/*INSERT INTO users(username, password)
 values
-    ('daisy', 'bleh');
+    ('daisy', 'bleh');*/

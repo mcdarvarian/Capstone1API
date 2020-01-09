@@ -9,6 +9,9 @@ const {requireAuth} = require('../basicAuth')
 const logger = winston.createLogger();
 
 function SanitizeNote(note){
+    if(!note){
+        return ({});
+    }
     return ({
         id: note.id,
         game_id: note.game_id,

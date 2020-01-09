@@ -23,7 +23,7 @@ if (process.env.NODE_ENV !== 'production') {
 //this route returns all the games in the database
 notebookRouter
     .route('/')
-    .all(requireAuth)
+    //.all(requireAuth)
     .get((req, res) => {
         NBS.getGames(req.app.get('db'))
             .then(data => {
@@ -65,7 +65,7 @@ notebookRouter
     notebookRouter
     //this route gets you all the notes within a game
     .route('/notes/:game_id')
-    .all(requireAuth)
+    //.all(requireAuth)
     .get((req, res) =>{
         const game_id = req.params;
         if(!game_id){
@@ -122,7 +122,7 @@ notebookRouter
 //route of the tabs page to see all notes within a tab
 notebookRouter
     .route('/:game_id/:tab_id')
-    .all(requireAuth)
+    //.all(requireAuth)
     .get((req, res) => {
         let errors = false;
         const { game_id, tab_id } = req.params;

@@ -25,22 +25,38 @@ notebookRouter
         .get((req, res) => {
                
             let user = req.get('authorization')
+            if(!user){
+                res.status(404).json({error: 'User Not Found'})
+            } else {
             user = user.slice('basic '.length, user.length);
             const [tokenUserName, tokenPassword] = Buffer
                 .from(user, 'base64')
                 .toString()
                 .split(':')
+
+            if(!tokenUserName || !tokenPassword){
+                res.status(401).json({error: 'User Not Found'})
+            } else {
             US.loginUser(req.app.get('db'), tokenUserName, tokenPassword)
             .then(user =>{
-                res.status(200).json(user);
+                //console.log(user);
+                if(!user){
+                    res.status(401).json({error: 'User Not Found'})
+                } else {
+                    res.status(200).json(user);
+                }
+            
             })
+        }
+    }
     })
 
 notebookRouter
     .route('/signUp')
     .post((req, res, next) => {
           
-        let user = req.get('authorization')
+        let user = req.get('authorization');
+        //console.log(user);
             user = user.slice('basic '.length, user.length);
             const [tokenUserName, tokenPassword] = Buffer
                 .from(user, 'base64')
@@ -90,18 +106,18 @@ notebookRouter
         }
     })
     .patch(bodyParser, (req, res) => {
-        console.log('in');
+        //console.log('in');
         let {old_username, new_username, new_password, admin_key} = req.body;
-        admin_key = Buffer.from(admin_key, 'base64').toString();
-        console.log(admin_key);
+        //admin_key = Buffer.from(admin_key, 'base64').toString();
+        //console.log(admin_key);
         if(!old_username || !new_username || !new_password || !admin_key){
-            console.log('1')
+            //console.log('1')
             res.status(401).json({error: 'missing required fields'})
         } else if (admin_key !== process.env.admin_key){
-            console.log('2');
+            //console.log('2');
             res.status(401).json({error: 'ur not an admin'});
         } else {
-            console.log('out');
+            //console.log('out');
             US.updateUser(req.app.get('db'), old_username, new_username, new_password)
             .then(user =>{
                 res.status(204).json(user);

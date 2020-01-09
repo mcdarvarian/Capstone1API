@@ -19,23 +19,81 @@ describe('App', () => {
     app.set('db', db);
   });
 
-  before('clear db', () =>{
-    return  db('notes').truncate();
-    
+  before('clear db', () => {
+    return db('notes').truncate();
+
   })
 
-  /*before(() =>{
-    return db('games').truncate();
+  before(() =>{
+    db.raw(
+      'TRUNCATE games, users RESTART IDENTITY CASCADE'
+    )
+  });
+/*
+  before(() =>{
+    return db('users').truncate();
   })*/
 
   after('remove connection', () => {
     return db.destroy();
   })
-  
-  context('with no data in the database', () => {
+
+  context('the /user route', () => {
+    context('no data in users database', () => {
+      it('GET /user/login' , () =>{
+        return supertest(app)
+          .get('/user/login')
+          .expect(404);
+      })
+
+      it('POST /user/signup', () =>{
+        return supertest(app)
+          .post('/user/signUp')
+          .set(
+            
+                'authorization', `basic ZGFpc3k6YmxlaA==`
+            
+        ).expect(201,  { id: 2, username: 'daisy', password: 'bleh' })
+      })
+    })
+
+    context('data in users database', () => {
+
+    })
+  })
+
+  context('the /note route', () => {
+    context('no data in notes/games/users database', () => {
+
+    })
+
+    context('data in notes/games/users database', () => {
+
+    })
+  })
+
+  context('the /setup route', () => {
+    context('data in tabs database', () => {
+
+    })
+  })
+
+  context('the /game route', () => {
+    context('no data in games/users database', () => {
+
+    })
+
+    context('data in games/users database', () => {
+
+    })
+  })
+
+  /*context('with no data in the database', () => {
     it('GET / responds with 200 and an empty array', () => {
       return supertest(app)
-        .get('/')
+        .get('/', {
+          'authorization': `basic ${TokenService.getAuthToken()}`
+        })
         .expect(200, [])
     })
 
@@ -62,9 +120,9 @@ describe('App', () => {
     
   })
   context('with data in the database', () =>{
-    /*beforeEach(() =>{
+    beforeEach(() =>{
       return db.insert(testNotes).into('notes').returning('*').then(rows =>{ console.log('rows: ', rows)})
-  })*/
+  })
 
     afterEach('empty the database (except tabs)', () =>{
       return db('notes').truncate();
@@ -106,10 +164,10 @@ describe('App', () => {
         })
         .expect(201, newNote);
     })
-  })
+  })*/
 
-  it.only('does the thing', () =>{
+  /*it('does the thing', () =>{
       console.log(TS.confirmTabExists(db, 6))
       
-  })
+  })*/
 })
