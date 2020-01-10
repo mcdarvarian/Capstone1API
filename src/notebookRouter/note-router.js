@@ -8,6 +8,7 @@ const {requireAuth} = require('../basicAuth')
 
 const logger = winston.createLogger();
 
+//this makes sure the notes are stable and wont cause any xss problems
 function SanitizeNote(note){
     if(!note){
         return ({});
@@ -24,7 +25,7 @@ function SanitizeNote(note){
 //route to get all notes
 notebookRouter
     .route('/')
-    //.all(requireAuth)
+    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     .get((req, res) =>{
         NS.getAllNotes(req.app.get('db'))
             .then(notes =>{
@@ -42,7 +43,7 @@ notebookRouter
 //route of a note tab to access the contents of a single note
 notebookRouter
     .route('/:note_id')
-    //.all(requireAuth)
+    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     .get((req, res)  =>{
         const {note_id} = req.params;
         //console.log(note_id)
@@ -95,7 +96,6 @@ notebookRouter
         const {note_id} = req.params;
         NS.deleteNote(req.app.get('db'), note_id)
             .then(note =>{
-                console.log(note);
                 if(!note){
                     logger.error(`note with id ${note_id} not found`);
                     res.status(404).send('not found');

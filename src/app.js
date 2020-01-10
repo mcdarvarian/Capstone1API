@@ -35,10 +35,13 @@ app.use((error, req, res, next) => {
     res.status(500).json(response)
 })
 
-
+// /note is for when you only care about a note
 app.use('/note', NR);
+// /setup is for tabs and should only be called once
 app.use('/setup', setup);
+// /game is for when you care about a game or its specific contents
 app.use('/game', TR);
+// /user is for getting/creating users
 app.use('/user', UR);
 
 

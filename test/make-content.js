@@ -71,14 +71,14 @@ function makeGames() {
 function makeNotes() {
     return [
         {
-            //id: 1,
+            
             game_id: 1, 
             tab_id: 1,
             title: 'bleh',
             contents: 'bleh 2: the blehing'
         },
         {
-            //id: 2,
+           
             game_id: 2, 
             tab_id: 1,
             title: 'bleh',

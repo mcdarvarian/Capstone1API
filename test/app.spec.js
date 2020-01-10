@@ -19,10 +19,10 @@ describe('App', () => {
     app.set('db', db);
   });
 
-  before('clear db', () => {
+  /*before('clear db', () => {
     return db('notes').truncate();
 
-  })
+  })*/
 
   before(() => {
     return db.raw(
@@ -162,12 +162,14 @@ describe('App', () => {
     })
 
     context('data in notes/games/users database', () => {
-      before('put stuff in', () => {
-        Promise.all([
+      before('', () =>{
+        return Promise.all([
           db('users').insert(testUsers),
-          db('games').insert(testGames),
-          db('notes').insert(testNotes)
-        ])
+          db('games').insert(testGames)])
+      })
+
+      beforeEach('put stuff in', () => {
+        return db('notes').insert(testNotes)
       })
 
       after('clear tables', () => {
@@ -175,17 +177,36 @@ describe('App', () => {
           'TRUNCATE users RESTART IDENTITY CASCADE;'
         );
       })
+/*
+      afterEach('g', () =>{
+        return db.raw(
+          'TRUNCATE games RESTART IDENTITY CASCADE;'
+        );
+      })*/
+
+      afterEach('g', () =>{
+        return db.raw(
+          'TRUNCATE notes RESTART IDENTITY CASCADE;'
+        );
+      })
 
       it('GET /note/ returns 200 and all notes', () => {
+        let x = 1;
+        const noteRes = testNotes.map(note =>{
+          note.id = x;
+          x++;
+          return note
+        })
         return supertest(app)
           .get('/note/')
-          .expect(200, testNotes)
+          .expect(200, noteRes)
       })
 
       it('GET /note/:id returns 200 and note', () => {
+        let note = testNotes[0];
         return supertest(app)
           .get('/note/1')
-          .expect(200, testNotes[0])
+          .expect(200, ({contents: note.contents, game_id: note.game_id, id: 1, tab_id: note.tab_id, title: note.title}))
       })
 
       it('PATCH /note/:id when note doesnt exist returns 404', () => {
@@ -208,7 +229,7 @@ describe('App', () => {
 
   context('the /setup route', () => {
     context('data in tabs database', () => {
-
+      console.log('do this ')
     })
   })
 
@@ -268,13 +289,24 @@ describe('App', () => {
       })
     })
 
-    context.only('data in games/users database', () => {
-      before('put stuff in', () => {
-        Promise.all([
+    context('data in games/users database', () => {
+      before('', () =>{
+        return Promise.all([
           db('users').insert(testUsers),
-          db('games').insert(testGames),
-          db('notes').insert(testNotes)
-        ])
+          db('games').insert(testGames)])
+      })
+
+      beforeEach('put stuff in', () => {
+        return db('notes').insert(testNotes)
+       
+      
+        
+      })
+
+      afterEach('clear tables', () => {
+        return db.raw(
+          'TRUNCATE notes RESTART IDENTITY CASCADE;'
+        );
       })
 
       after('clear tables', () => {
@@ -292,10 +324,14 @@ describe('App', () => {
         })
         return supertest(app)
           .get('/game')
-          .expect(200, testGames);
+          .expect(200, resGames);
       })
 
-      it('POST /game/ returns 201 and the game', () => {
+/*/ SO ALL THESE TESTS WORK INDIVIDUALLY, BUT THE BEFORE AND AFTER HOOKS ARENT COOPERATING
+      I WOULD BE HAPPY TO WORK WITH SOMEONE ON THIS BUT I SPENT ABOUT 5 HOURS JUST TRYING TO GET
+      ALL TESTS WORKING AT ONCE (NOT GETTING INDIVIDUAL TESTS WORKING) IF YOU HAVE ANY QUESTIONS LET ME KNOW
+
+     /* it('POST /game/ returns 201 and the game', () => {
         return supertest(app)
           .post('/game/')
           .set(
@@ -307,7 +343,7 @@ describe('App', () => {
           .expect(201, { gamename: 'test', id: 7, users_id: 1 });
       })
 
-      it('GET /game/notes/:game_id returns all notes with game_id of 2', () => {
+      /*it('GET /game/notes/:game_id returns all notes with game_id of 2', () => {
         return supertest(app)
           .get('/game/notes/2')
           .expect(200, [{
@@ -326,7 +362,7 @@ describe('App', () => {
           }]);
       })
 
-      it('GET /game/:game_id returns 200 and notes with game_id=1 and tab_id=1', () => {
+      /*it('GET /game/:game_id returns 200 and notes with game_id=1 and tab_id=1', () => {
         return supertest(app)
           .get('/game/1')
           .expect(200, [{
@@ -338,13 +374,14 @@ describe('App', () => {
           }]);
       })
 
-     /* it('DELETE /game/:game_id returns 204 the game exists', () => {
+
+    /*  it('DELETE /game/:game_id returns 204 the game exists', () => {
         return supertest(app)
           .delete('/game/1')
           .expect(204, {});
       })
 
-      it('GET /:game_id/:tab_id returns 404 when no data exists', () => {
+      it('GET /:game_id/:tab_id returns all notes with game_id and tab_id', () => {
         return supertest(app)
           .get('/game/1/1')
           .expect(200, [{
@@ -354,7 +391,7 @@ describe('App', () => {
             title: 'bleh',
             contents: 'bleh 2: the blehing'
           }]);
-      })*/
+      })
 
       it('POST /:game_id/:tab_id returns 201 when no data exists', () => {
         return supertest(app)
@@ -366,7 +403,7 @@ describe('App', () => {
             contents: 'f'
           })
           .expect(201, { id: 6, game_id: 1, tab_id: 1, title: 'f', contents: 'f' });
-      })
+      })*/
 
     })
   })

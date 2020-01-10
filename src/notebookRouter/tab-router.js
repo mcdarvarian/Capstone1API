@@ -27,14 +27,14 @@ notebookRouter
     .get((req, res) => {
         NBS.getGames(req.app.get('db'))
             .then(data => {
-                console.log(data);
+                //console.log(data);
                 res.status(200).json(data)
             })
 
     })
-    //this route makes a new game in the database
+    //this route makes a new game in the database, using authorization for getting user_id
     .post(bodyParser, (req, res, next) => {
-
+        //get username/pass from auth encryption
         let token = req.get('authorization');
         token = token.slice('basic '.length, token.length)
         const [tokenUserName, tokenPassword] = Buffer
@@ -68,10 +68,9 @@ notebookRouter
 notebookRouter
     //this route gets you all the notes within a game
     .route('/notes/:game_id')
-    //.all(requireAuth)
+    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     .get((req, res) => {
         const game_id = req.params;
-        console.log(game_id.game_id)
         if (!game_id) {
             logger.error('missing note requirements');
             res.status(404).send('missing requirements');
@@ -79,7 +78,6 @@ notebookRouter
             NBS.getGamebyId(req.app.get('db'), game_id.game_id)
                 .then(game => {
                     if (!game) {
-                        console.log('gg');
                         res.status(404).send('game does not exist')
                     } else {
                         NBS.getNotesByGame(req.app.get('db'), game_id.game_id)
@@ -94,7 +92,7 @@ notebookRouter
 
 notebookRouter
     .route('/:game_id')
-    //.all(requireAuth)
+    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     //this route shows all the tabs for the game of game_id, it defaults to the first tab
     .get((req, res) => {
         let errors = false;
@@ -135,11 +133,11 @@ notebookRouter
 //route of the tabs page to see all notes within a tab
 notebookRouter
     .route('/:game_id/:tab_id')
-    //.all(requireAuth)
+    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     .get((req, res) => {
         let errors = false;
         const { game_id, tab_id } = req.params;
-        console.log(game_id, tab_id);
+        //console.log(game_id, tab_id);
         NBS.getGamebyId(req.app.get('db'), game_id)
             .then(data => {
                 if (!data) {
@@ -160,7 +158,7 @@ notebookRouter
             logger.error('missing note requirements');
             res.status(400).send('bad request');
         } else {
-            const newNote = {/* id,*/ tab_id, game_id, title, contents }
+            const newNote = {tab_id, game_id, title, contents }
             NBS.getGamebyId(req.app.get('db'), game_id)
                 .then(data => {
                     if (!data) {
@@ -168,7 +166,6 @@ notebookRouter
                     } else {
                         NBS.makeNote(req.app.get('db'), newNote)
                             .then(note => {
-                                //console.log('here')
                                 res.status(201).json(note)
                             })
                             .catch(next);

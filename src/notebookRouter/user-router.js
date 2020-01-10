@@ -21,7 +21,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 notebookRouter
     .route('/login')
-    //.all(requireAuth)
+    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
+    //this checked to make sure the logged in user exists
     .get((req, res) => {
 
         let user = req.get('authorization')
@@ -53,6 +54,7 @@ notebookRouter
 
 notebookRouter
     .route('/signUp')
+    //this lets anyone create a new user given they have a unique username and password
     .post(bodyParser, (req, res, next) => {
         //console.log('in');
         let user = req.get('authorization');
@@ -95,29 +97,24 @@ notebookRouter
 
 notebookRouter
     .route('/admin')
+    //deletes a user give you have their name, password and the admin password
     .delete(bodyParser, (req, res, next) => {
-        //console.log('here')
         let { username, password, admin_key } = req.body;
-        //console.log('adk',  admin_key);
         admin_key = Buffer.from(admin_key, 'base64')
             .toString()
-        //console.log(admin_key);
         if (!username || !password || !admin_key) {
-            console.log(1)
             res.status(401).json({ error: 'missing required fields' })
         } else if (admin_key !== process.env.admin_key) {
-            console.log(2)
             res.status(401).json({ error: 'ur not an admin' });
         } else {
             US.loginUser(req.app.get('db'), username, password)
                 .then(user => {
-                    //console.log(user);
                     if (!user) {
                         res.status(401).json({ error: 'missing user' });
                     } else {
                         US.deleteUser(req.app.get('db'), username, password)
                             .then(user => {
-                                console.log(3)
+                                
                                 res.status(204).json(user);
                             })
                     }
@@ -125,14 +122,10 @@ notebookRouter
                 })
         }
     })
+    //this lets you change a user's username and password provided you have their current username and the admin password
     .patch(bodyParser, (req, res) => {
-        //console.log('in');
         let { old_username, new_username, new_password, admin_key } = req.body;
         admin_key = Buffer.from(admin_key, 'base64').toString();
-        /*console.log(old_username);
-        console.log(new_username);
-        console.log(new_password);
-        console.log(admin_key);*/
         if (!old_username || !new_username || !new_password || !admin_key) {
             //console.log('1')
             res.status(401).json({ error: 'missing required fields' })
