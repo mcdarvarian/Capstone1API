@@ -5,18 +5,12 @@ Live Link to app:
 
 https://capstone-client-jfdfbg8qt.now.sh/
 
-Client Documentation
+Server Documentation
 
-/ -> takes you to the game select screen
-/login -> takes you to login
-/signup -> takes you to the sign up
-/shhh -> takes you to admin page
-/game/:game_id/:tab_id -> takes you to note list of a game and tab
-/note/:game_id/:tab_id/:note_id -> takes you to an expanded page of a note
-/new_game -> game creation
-/note-form/:game_id/:tab_id/:note_id -> takes you to update a note
-/note-form/:game_id/:tab_id/0 -> takes you to make a note 
-/missingpage -> when something isnt found
+/game -> gets you any information that requires a game id, all games, notes within a game or notes that belong to a user
+/user -> used for creating, loging in, deleting or changing a user
+/setup -> used for getting setup information to the client
+/note -> used for getting/making/updating specific notes 
 
 Technology used:
 React, CSS, Node, Express, PostgreSQL
