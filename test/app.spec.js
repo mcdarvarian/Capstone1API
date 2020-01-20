@@ -14,7 +14,7 @@ describe('App', () => {
   before('set up connection', () => {
     db = knex({
       client: 'pg',
-      connection: process.env.TEST_DATABASE_URL
+      connection: process.env.DATABASE_URL
     });
     app.set('db', db);
   });
