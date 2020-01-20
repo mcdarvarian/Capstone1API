@@ -70,8 +70,7 @@ function makeGames() {
 
 function makeNotes() {
     return [
-        {
-            
+        { 
             game_id: 1, 
             tab_id: 1,
             title: 'bleh',

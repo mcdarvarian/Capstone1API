@@ -80,7 +80,7 @@ notebookRouter
                         const users_id = user.id;
                         newGame = { users_id, gamename };
                         NBS.makeGame(req.app.get('db'), newGame)
-                            .then(game => {
+                            .then(game => {                               
                                 const safeGames = sanatizeGame(game);
                                 res.status(201).json(safeGames);
                             })
@@ -132,17 +132,17 @@ notebookRouter
         const game_id = req.params;
         if (!game_id) {
             logger.error('missing note requirements');
-            res.status(404).send('missing requirements');
+            return res.status(404).send('missing requirements');
         } else {
             NBS.getGamebyId(req.app.get('db'), game_id.game_id)
                 .then(game => {
                     if (!game) {
-                        res.status(404).send('game does not exist');
+                        return res.status(404).send('game does not exist');
                     } else {
                         NBS.getNotesByGame(req.app.get('db'), game_id.game_id)
                             .then(notes => {
                                 const safeNotes = notes.map(note => SanitizeNote(note));
-                                res.status(200).json(safeNotes);
+                                return res.status(200).json(safeNotes);
                             });
                     }
                 });
@@ -183,9 +183,9 @@ notebookRouter
             .then(game => {
                 if (!game) {
                     logger.error(`game with id ${game_id} not found`);
-                    res.status(404).send('game not found');
+                    return res.status(404).send('game not found');
                 } else {
-                    res.status(204);
+                    return res.status(204).send();
                 }
             });
     });
