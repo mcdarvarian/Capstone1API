@@ -25,45 +25,42 @@ notebookRouter
     //this checked to make sure the logged in user exists
     .get((req, res) => {
 
-        let user = req.get('authorization')
+        let user = req.get('authorization');
         if (!user) {
-            res.status(404).json({ error: 'User Not Found' })
+            res.status(404).json({ error: 'User Not Found' });
         } else {
             user = user.slice('basic '.length, user.length);
             const [tokenUserName, tokenPassword] = Buffer
                 .from(user, 'base64')
                 .toString()
-                .split(':')
+                .split(':');
 
             if (!tokenUserName || !tokenPassword) {
-                res.status(401).send('User Not Found')
+                res.status(401).send('User Not Found');
             } else {
                 US.loginUser(req.app.get('db'), tokenUserName, tokenPassword)
                     .then(user => {
-                        //console.log(user);
                         if (!user) {
-                            res.status(401).send('User Not Found')
+                            res.status(401).send('User Not Found');
                         } else {
                             res.status(200).json(user);
                         }
 
-                    })
+                    });
             }
         }
-    })
+    });
 
 notebookRouter
     .route('/signUp')
     //this lets anyone create a new user given they have a unique username and password
-    .post(bodyParser, (req, res, next) => {
-        //console.log('in');
+    .post(bodyParser, (req, res) => {
         let user = req.get('authorization');
-        //console.log(user);
         user = user.slice('basic '.length, user.length);
         const [tokenUserName, tokenPassword] = Buffer
             .from(user, 'base64')
             .toString()
-            .split(':')
+            .split(':');
 
 
         if (!tokenUserName || !tokenPassword) {
@@ -73,35 +70,31 @@ notebookRouter
             const newUser = {
                 username: tokenUserName,
                 password: tokenPassword
-            }
-            //console.log(tokenUserName)
+            };
+            
             US.findUserByName(req.app.get('db'), tokenUserName)
                 .then(userRes => {
-                    //console.log('userRes is ', userRes);
-                    if (!userRes) {
-                        //console.log('not here'); 
+                    if (!userRes) {   
                         US.makeUser(req.app.get('db'), newUser)
-                            .then(user => {
-                                //console.log('done')
+                            .then(user => { 
                                 res.status(201).json(user);
                             })
                             .done();
                     } else {
-                        //console.log('here');
                         res.status(401).send('user already exists');
                     }
-                })
+                });
 
         }
-    })
+    });
 
 notebookRouter
     .route('/admin')
     //deletes a user give you have their name, password and the admin password
-    .delete(bodyParser, (req, res, next) => {
+    .delete(bodyParser, (req, res) => {
         let { username, password, admin_key } = req.body;
         admin_key = Buffer.from(admin_key, 'base64')
-            .toString()
+            .toString();
         if (!username || !password || !admin_key) {
             res.status(401).json({ error: 'missing required fields' })
         } else if (admin_key !== process.env.admin_key) {
@@ -116,10 +109,10 @@ notebookRouter
                             .then(user => {
                                 
                                 res.status(204).json(user);
-                            })
+                            });
                     }
 
-                })
+                });
         }
     })
     //this lets you change a user's username and password provided you have their current username and the admin password
@@ -127,26 +120,26 @@ notebookRouter
         let { old_username, new_username, new_password, admin_key } = req.body;
         admin_key = Buffer.from(admin_key, 'base64').toString();
         if (!old_username || !new_username || !new_password || !admin_key) {
-            //console.log('1')
-            res.status(401).json({ error: 'missing required fields' })
+            
+            res.status(401).json({ error: 'missing required fields' });
         } else if (admin_key !== process.env.admin_key) {
-            //console.log('2');
+            
             res.status(401).json({ error: 'ur not an admin' });
         } else {
-            //console.log('out');
+            
             US.findUserByName(req.app.get('db'), old_username)
                 .then(user => {
-                    //console.log(user);
+                    
                     if (!user) {
                         res.status(401).json({ error: 'missing user' });
                     } else {
                         US.updateUser(req.app.get('db'), old_username, new_username, new_password)
                             .then(user => {
                                 res.status(204).json(user);
-                            })
+                            });
                     }
-                })
+                });
         }
-    })
+    });
 
 module.exports = notebookRouter;

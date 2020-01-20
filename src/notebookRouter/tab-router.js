@@ -4,6 +4,7 @@ const notebookRouter = express.Router();
 const NBS = require('./tab-service');
 const US = require('./user-service');
 const bodyParser = express.json();
+const xss = require('xss');
 const { requireAuth } = require('../basicAuth');
 
 const logger = winston.createLogger({
@@ -20,6 +21,30 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
+function sanatizeGame(game){
+    if (!game) {
+        return ({});
+    }
+    return ({
+        id: game.id,
+        gamename: xss(game.gamename),
+        users_id: game.users_id
+    });
+}
+
+function SanitizeNote(note) {
+    if (!note) {
+        return ({});
+    }
+    return ({
+        id: note.id,
+        game_id: note.game_id,
+        tab_id: note.tab_id,
+        title: xss(note.title),
+        contents: xss(note.contents)
+    });
+}
+
 //this route returns all the games in the database
 notebookRouter
     .route('/')
@@ -27,20 +52,21 @@ notebookRouter
     .get((req, res) => {
         NBS.getGames(req.app.get('db'))
             .then(data => {
-                //console.log(data);
-                res.status(200).json(data)
-            })
+                const safeGames = data.map(game => sanatizeGame(game));
+                res.status(200).json(safeGames);
+            });
 
     })
     //this route makes a new game in the database, using authorization for getting user_id
     .post(bodyParser, (req, res, next) => {
         //get username/pass from auth encryption
         let token = req.get('authorization');
-        token = token.slice('basic '.length, token.length)
+        token = token.slice('basic '.length, token.length);
         const [tokenUserName, tokenPassword] = Buffer
             .from(token, 'base64')
             .toString()
-            .split(':')
+            .split(':');
+
         US.findUserByName(req.app.get('db'), tokenUserName)
             .then(user => {
                 if (!user) {
@@ -53,10 +79,10 @@ notebookRouter
                     } else {
                         const users_id = user.id;
                         newGame = { users_id, gamename };
-                        //console.log(newGame);
                         NBS.makeGame(req.app.get('db'), newGame)
                             .then(game => {
-                                res.status(201).json(game)
+                                const safeGames = sanatizeGame(game);
+                                res.status(201).json(safeGames);
                             })
                             .catch(next);
                     }
@@ -64,6 +90,39 @@ notebookRouter
             })
 
     })
+
+notebookRouter
+    .route('/user')
+    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
+    .get((req, res) => {
+        let user = req.get('authorization');
+        if (!user) {
+            res.status(404).json({ error: 'User Not Found' });
+        } else {
+            user = user.slice('basic '.length, user.length);
+            const [tokenUserName, tokenPassword] = Buffer
+                .from(user, 'base64')
+                .toString()
+                .split(':')
+
+            if (!tokenUserName || !tokenPassword) {
+                res.status(401).send('Not logged in');
+            } else {
+                US.findUserByName(req.app.get('db'), tokenUserName)
+                    .then(user => {
+                        if (!user) {
+                            res.status(401).send('User Not Found')
+                        } else {
+                            NBS.getGamesByUserId(req.app.get('db'), user.id)
+                            .then(games =>{
+                                const safeGames = games.map(game => sanatizeGame(game));
+                                res.status(200).json(safeGames);
+                            });
+                        }
+                    });
+            }
+        }
+    });
 
 notebookRouter
     //this route gets you all the notes within a game
@@ -78,17 +137,18 @@ notebookRouter
             NBS.getGamebyId(req.app.get('db'), game_id.game_id)
                 .then(game => {
                     if (!game) {
-                        res.status(404).send('game does not exist')
+                        res.status(404).send('game does not exist');
                     } else {
                         NBS.getNotesByGame(req.app.get('db'), game_id.game_id)
                             .then(notes => {
-                                res.status(200).json(notes);
-                            })
+                                const safeNotes = notes.map(note => SanitizeNote(note));
+                                res.status(200).json(safeNotes);
+                            });
                     }
-                })
+                });
 
         }
-    })
+    });
 
 notebookRouter
     .route('/:game_id')
@@ -107,13 +167,14 @@ notebookRouter
                 return data;
             })
             .then(() => {
-                NBS.getNotesByGameAndTab(req.app.get('db'),game_id, 1)
+                NBS.getNotesByGameAndTab(req.app.get('db'), game_id, 1)
                     .then(data => {
                         if (!errors) {
-                            res.json(data);
+                            const safeNotes = data.map(note => SanitizeNote(note));
+                            res.json(safeNotes);
                         }
-                    })
-            })
+                    });
+            });
     })
     //this route also lets you delete a game if you want 
     .delete((req, res) => {
@@ -124,10 +185,10 @@ notebookRouter
                     logger.error(`game with id ${game_id} not found`);
                     res.status(404).send('game not found');
                 } else {
-                    res.status(204).json(game);
+                    res.status(204);
                 }
-            })
-    })
+            });
+    });
 
 
 //route of the tabs page to see all notes within a tab
@@ -135,21 +196,21 @@ notebookRouter
     .route('/:game_id/:tab_id')
     //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     .get((req, res) => {
-        let errors = false;
+        
         const { game_id, tab_id } = req.params;
-        //console.log(game_id, tab_id);
         NBS.getGamebyId(req.app.get('db'), game_id)
             .then(data => {
                 if (!data) {
-                    res.status(404).send('game not found')
+                    res.status(404).send('game not found');
                 } else {
                     NBS.getNotesByGameAndTab(req.app.get('db'), game_id, tab_id)
                         .then(notes => {
-                            res.json(notes);
-                        })
+                            const safeNotes = notes.map(note => SanitizeNote(note));
+                            res.status(200).json(safeNotes);
+                        });
                 }
 
-            })
+            });
     })
     //this lets you put a new note in a tab
     .post(bodyParser, (req, res, next) => {
@@ -158,21 +219,23 @@ notebookRouter
             logger.error('missing note requirements');
             res.status(400).send('bad request');
         } else {
-            const newNote = {tab_id, game_id, title, contents }
+            const newNote = { tab_id, game_id, title, contents };
             NBS.getGamebyId(req.app.get('db'), game_id)
                 .then(data => {
                     if (!data) {
-                        res.status(404).send('game not found')
+                        res.status(404).send('game not found');
                     } else {
                         NBS.makeNote(req.app.get('db'), newNote)
                             .then(note => {
-                                res.status(201).json(note)
+                                const safeNote = SanitizeNote(note);
+                                
+                                res.status(201).json(safeNote);
                             })
                             .catch(next);
                     }
-                })
+                });
         }
-    })
+    });
 
 
 

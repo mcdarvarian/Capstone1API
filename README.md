@@ -1,6 +1,6 @@
-This is the Server for my TTRPG note taking App
+This is the Server for my Table Top Role Playing Game note taking App
 
-You can check it out at https://capstone-client.pupeljack.now.sh/
+You can check it out at https://vast-forest-79747.herokuapp.com/
 
 Screenshots live at: 
 https://gyazo.com/2bc3d97251906ac6b36c83786366534d

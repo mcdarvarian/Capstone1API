@@ -3,6 +3,10 @@ const NotebookService = {
         return db.select('*').from('games');
     },
 
+    getGamesByUserId(db, users_id){
+        return db.select('*').from('games').where({users_id: users_id})
+    },
+
     getGamebyId(db, id){
         return db.select('*').from('games').where({id: id}).first();
     },
@@ -26,13 +30,13 @@ const NotebookService = {
     makeNote(db, newNote){
         return db.insert(newNote).into('notes').returning('*').then(rows =>{
             return rows[0];
-        })
+        });
     },
 
     makeGame(db, newGame){
         return db.insert(newGame).into('games').returning('*').then(rows =>{
             return rows[0];
-        })
+        });
     },
 
     deleteGame(db, id){
@@ -42,6 +46,6 @@ const NotebookService = {
     
 
     
-}
+};
 
 module.exports = NotebookService;

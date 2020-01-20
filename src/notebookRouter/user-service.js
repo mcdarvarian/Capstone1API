@@ -11,7 +11,6 @@ const NotebookService = {
     },
 
     findUserByName(db, username){
-        //console.log(username);
         return db('users').select('*').where({username: username}).first();
     },
 
@@ -25,6 +24,6 @@ const NotebookService = {
             password: newPass
         }, ['id', 'username', 'password']);
     },
-}
+};
 
 module.exports =  NotebookService;
