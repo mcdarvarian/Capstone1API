@@ -74,7 +74,7 @@ notebookRouter
                 } else {
                     const { gamename } = req.body;
                     if (!gamename) {
-                        logger.error('missing game requirements')
+                        logger.error('missing game requirements');
                         res.status(400).send('bad request');
                     } else {
                         const users_id = user.id;
@@ -87,9 +87,9 @@ notebookRouter
                             .catch(next);
                     }
                 }
-            })
+            });
 
-    })
+    });
 
 notebookRouter
     .route('/user')
@@ -103,7 +103,7 @@ notebookRouter
             const [tokenUserName, tokenPassword] = Buffer
                 .from(user, 'base64')
                 .toString()
-                .split(':')
+                .split(':');
 
             if (!tokenUserName || !tokenPassword) {
                 res.status(401).send('Not logged in');
@@ -111,7 +111,7 @@ notebookRouter
                 US.findUserByName(req.app.get('db'), tokenUserName)
                     .then(user => {
                         if (!user) {
-                            res.status(401).send('User Not Found')
+                            res.status(401).send('User Not Found');
                         } else {
                             NBS.getGamesByUserId(req.app.get('db'), user.id)
                             .then(games =>{

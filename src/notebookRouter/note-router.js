@@ -37,7 +37,7 @@ notebookRouter
                     safeNotes = notes.map(note => SanitizeNote(note));
                     res.json(safeNotes);
                 }
-            })
+            });
     });
 
 
@@ -58,12 +58,12 @@ notebookRouter
                 .split(':');
 
             if (!tokenUserName || !tokenPassword) {
-                res.status(401).send('Not logged in')
+                res.status(401).send('Not logged in');
             } else {
                 US.findUserByName(req.app.get('db'), tokenUserName)
                     .then(user => {
                         if (!user) {
-                            res.status(401).send('User Not Found')
+                            res.status(401).send('User Not Found');
                         } else {
                             NS.getNoteByUser(req.app.get('db'), user.id)
                                 .then(notes => {
@@ -113,12 +113,12 @@ notebookRouter
                         //logger.error(`note with id ${note_id} not found`)
                         res.status(404).send('note not found');
                     } else {
-                        const newNote = { game_id: note1.game_id, tab_id: note1.tab_id, title, contents }
+                        const newNote = { game_id: note1.game_id, tab_id: note1.tab_id, title, contents };
                         NS.updateNotebyId(req.app.get('db'), note_id, newNote)
                             .then(note => {
                                 if (!note) {
                                     logger.error(`note with ${id} not found`);
-                                    res.status(400).send('not found')
+                                    res.status(400).send('not found');
                                 } else {
                                     res.status(202).json(SanitizeNote(note[0]));
                                 }

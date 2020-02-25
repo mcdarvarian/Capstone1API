@@ -64,7 +64,7 @@ notebookRouter
 
 
         if (!tokenUserName || !tokenPassword) {
-            res.status(401).json({ error: 'missing username or password' })
+            res.status(401).json({ error: 'missing username or password' });
         } else {
 
             const newUser = {
@@ -96,7 +96,7 @@ notebookRouter
         admin_key = Buffer.from(admin_key, 'base64')
             .toString();
         if (!username || !password || !admin_key) {
-            res.status(401).json({ error: 'missing required fields' })
+            res.status(401).json({ error: 'missing required fields' });
         } else if (admin_key !== process.env.admin_key) {
             res.status(401).json({ error: 'ur not an admin' });
         } else {

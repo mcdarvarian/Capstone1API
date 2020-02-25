@@ -17,8 +17,7 @@ db = knex({
 });
 app.set('db', db);
 
-const morganOption = (NODE_ENV === 'production')
-    ? 'tiny'
+const morganOption = (NODE_ENV === 'production') ? 'tiny'
     : 'common';
 
 app.use(morgan(morganOption));
@@ -28,7 +27,7 @@ app.use(cors());
 app.use((error, req, res, next) => {
     let response;
     if (process.env.NODE_ENV === 'production') {
-        response = { error: { message: 'server error' } }
+        response = { error: { message: 'server error' } };
     } else {
         response = { error };
     }
@@ -48,7 +47,7 @@ app.use('/user', UR);
 app.use(function errorHandler(error, req, res, next) {
     let response;
     if (NODE_ENV === 'production') {
-        response = { error: { message: 'server error' } }
+        response = { error: { message: 'server error' } };
     } else {
         console.error(error);
         response = { message: error.message, error };

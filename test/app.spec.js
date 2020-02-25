@@ -3,9 +3,6 @@ const knex = require('knex');
 const setup = require('./make-content');
 const TS = require('../src/notebookRouter/tab-service');
 
-
-
-
 describe('App', () => {
   let db;
   const testUsers = setup.makeUsers();
@@ -33,6 +30,12 @@ describe('App', () => {
 
   context('the /user route', () => {
     context('no data in users database', () => {
+      beforeEach('clear everything', () =>{
+        return db.raw(
+          'TRUNCATE users RESTART IDENTITY CASCADE;'
+        );
+      });
+
       it('GET /user/login', () => {
         return supertest(app)
           .get('/user/login')
@@ -47,11 +50,33 @@ describe('App', () => {
           )
           .expect(201, { id: 1, username: 'daisy', password: 'bleh' });
       });
+
+      it('DELETE returns 401 when no user exists', () =>{
+        return supertest(app)
+        .delete('/user/admin')
+        .send({
+          username: 'daisy',
+          password: 'bleh',
+          admin_key: 'SW1EYWlzeQ=='
+        }).expect(401);
+      });
+
+      it('PATCH returns 401 when no user exists', () =>{
+        return supertest(app)
+          .patch('/user/admin')
+          .send({
+            old_username: 'daisy',
+            new_username: 'dais',
+            new_password: 'bleh',
+            admin_key: 'SW1EYWlzeQ=='
+          })
+          .expect(401);
+      });
     });
 
     context('data in users database', () => {
       beforeEach('put users in', () => {
-        return db('users').insert(testUsers)
+        return db('users').insert(testUsers);
       });
 
       afterEach('clear Users', () => {
@@ -138,7 +163,7 @@ describe('App', () => {
         return supertest(app)
           .get('/user/')
           .expect(404);
-      })
+      });
 
       it('GET /note/:id when note doesnt exist returns 404', () => {
         return supertest(app)
@@ -281,7 +306,7 @@ describe('App', () => {
               id: 6,
               tabname: "plot story"
             }
-          ])
+          ]);
       });
     });
   });
@@ -310,6 +335,15 @@ describe('App', () => {
             gamename: 'test'
           })
           .expect(400);
+      });
+
+      it('GET /game/user returns 401 when no users',() =>{
+        return supertest(app)
+        .get('/game/user')
+        .set(
+          'authorization', `basic ZGFpc3k6YmxlaA`
+        )
+        .expect(401);
       });
 
       it('GET /game/notes/:game_id returns 404', () => {
@@ -398,6 +432,20 @@ describe('App', () => {
             gamename: 'test'
           })
           .expect(201, { gamename: 'test', id: 7, users_id: 1 });
+      });
+
+      it('GET /game/user returns all notes for the user', () =>{
+        const result = [
+          { id: 1, gamename: 'one', users_id: 1 },
+          { id: 4, gamename: 'four', users_id: 1 },
+          { id: 7, gamename: 'test', users_id: 1 }
+        ];
+        return supertest(app)
+        .get('/game/user/')
+        .set(
+          'authorization', `basic ZGFpc3k6YmxlaA==`
+        )
+        .expect(200, result);
       });
 
       it('GET /game/notes/:game_id returns all notes with game_id of 2', () => {

@@ -30,7 +30,7 @@ function makeUsers() {
             username: 'six', 
             password: 'bleh'
         },
-    ]
+    ];
 }
 
 function makeGames() {
@@ -65,7 +65,7 @@ function makeGames() {
             users_id: 3, 
             gamename: 'six'
         },
-    ]
+    ];
 }
 
 function makeNotes() {
@@ -104,7 +104,7 @@ function makeNotes() {
             title: 'bleh',
             contents: 'bleh 2: the blehing'
         },
-    ]
+    ];
 }
     
-module.exports = {makeGames, makeNotes, makeUsers}
+module.exports = {makeGames, makeNotes, makeUsers};

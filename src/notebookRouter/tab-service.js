@@ -4,7 +4,7 @@ const NotebookService = {
     },
 
     getGamesByUserId(db, users_id){
-        return db.select('*').from('games').where({users_id: users_id})
+        return db.select('*').from('games').where({users_id: users_id});
     },
 
     getGamebyId(db, id){
@@ -40,7 +40,7 @@ const NotebookService = {
     },
 
     deleteGame(db, id){
-        return db('games').where('id', id).del()
+        return db('games').where('id', id).del();
     }
 
     
