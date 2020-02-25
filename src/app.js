@@ -13,7 +13,7 @@ const knex = require('knex');
 
 db = knex({
     client: 'pg',
-    connection: process.env.DATABASE_URL  //change this to DATABSE_URL
+    connection: process.env.TEST_DATABASE_URL  //change this to DATABSE_URL
 });
 app.set('db', db);
 

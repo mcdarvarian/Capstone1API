@@ -13,7 +13,7 @@ const NotebookService = {
             SELECT n.* FROM notes n JOIN games g ON n.game_id = g.id WHERE g.users_id = ${users_id};
         `).then(res =>{
             return res.rows;
-        })
+        });
     },
 
     updateNotebyId(db, id, newNote){
@@ -26,8 +26,8 @@ const NotebookService = {
     },
 
     deleteNote(db, id){
-        return db('notes').where('id', id).del()
+        return db('notes').where('id', id).del();
     }
-}
+};
 
 module.exports = NotebookService;

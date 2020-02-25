@@ -45,15 +45,17 @@ notebookRouter
     .route('/user')
     //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     .get((req, res) => {
-        let user = req.get('authorization')
+        console.log('hello');
+        let user = req.get('authorization');
+        console.log(user);
         if (!user) {
-            res.status(404).json({ error: 'User Not Found' })
+            res.status(404).json({ error: 'User Not Found' });
         } else {
             user = user.slice('basic '.length, user.length);
             const [tokenUserName, tokenPassword] = Buffer
                 .from(user, 'base64')
                 .toString()
-                .split(':')
+                .split(':');
 
             if (!tokenUserName || !tokenPassword) {
                 res.status(401).send('Not logged in')
@@ -66,10 +68,10 @@ notebookRouter
                             NS.getNoteByUser(req.app.get('db'), user.id)
                                 .then(notes => {
                                     safeNotes = notes.map(note => SanitizeNote(note));
-                                    res.status(200).json(safeNotes)
-                                })
+                                    res.status(200).json(safeNotes);
+                                });
                         }
-                    })
+                    });
 
             }
 
@@ -120,9 +122,9 @@ notebookRouter
                                 } else {
                                     res.status(202).json(SanitizeNote(note[0]));
                                 }
-                            })
+                            });
                     }
-                })
+                });
 
         }
     })

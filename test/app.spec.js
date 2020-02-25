@@ -5,6 +5,7 @@ const TS = require('../src/notebookRouter/tab-service');
 
 
 
+
 describe('App', () => {
   let db;
   const testUsers = setup.makeUsers();
@@ -133,6 +134,12 @@ describe('App', () => {
           .expect(404);
       });
 
+      it('GET /user/ returns 404 when user doesnt exist', () =>{
+        return supertest(app)
+          .get('/user/')
+          .expect(404);
+      })
+
       it('GET /note/:id when note doesnt exist returns 404', () => {
         return supertest(app)
           .get('/note/1')
@@ -190,6 +197,32 @@ describe('App', () => {
         });
         return supertest(app)
           .get('/note/')
+          .expect(200, noteRes);
+      });
+
+      it('GET /user returns 200 and all notes', () =>{
+        let x = 1;
+        let noteRes = [
+          {
+            id: 1,
+            game_id: 1,
+            tab_id: 1,
+            title: 'bleh',
+            contents: 'bleh 2: the blehing'
+          },
+          {
+            id: 4,
+            game_id: 1,
+            tab_id: 2,
+            title: 'bleh',
+            contents: 'bleh 2: the blehing'
+          }
+        ];
+        return supertest(app)
+          .get('/note/user')
+          .set(
+            'authorization', `basic ZGFpc3k6YmxlaA==`
+          )
           .expect(200, noteRes);
       });
 
