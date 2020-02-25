@@ -96,7 +96,6 @@ describe('App', () => {
 
 
       it('POST /user/signup with dup username returns 401', () => {
-        //console.log('start')
         return supertest(app)
           .post('/user/signUp')
           .set(

@@ -26,12 +26,10 @@ function SanitizeNote(note) {
 //route to get all notes
 notebookRouter
     .route('/')
-    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     .get((req, res) => {
         NS.getAllNotes(req.app.get('db'))
             .then(notes => {
                 if (notes.length === 0) {
-                    //logger.error(`no notes exist`)
                     res.status(404).send('no notes');
                 } else {
                     safeNotes = notes.map(note => SanitizeNote(note));
@@ -43,7 +41,6 @@ notebookRouter
 
 notebookRouter
     .route('/user')
-    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     .get((req, res) => {
         console.log('hello');
         let user = req.get('authorization');
@@ -81,14 +78,13 @@ notebookRouter
 
 notebookRouter
     .route('/:note_id')
-    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     .get((req, res) => {
         const { note_id } = req.params;
 
         NS.getNoteById(req.app.get('db'), note_id)
             .then(note => {
                 if (!note) {
-                    //logger.error(`note with id ${note_id} not found`)
+
                     res.status(404).send('note not found');
                 } else {
                     res.json(SanitizeNote(note));
@@ -103,14 +99,12 @@ notebookRouter
         let { note_id } = req.params;
         let { title, contents } = req.body;
         if (!note_id || !title || !contents) {
-            //logger.error('update missing required fields');
             res.status(400).send('bad update');
         } else {
 
             NS.getNoteById(req.app.get('db'), note_id)
                 .then(note1 => {
                     if (!note1) {
-                        //logger.error(`note with id ${note_id} not found`)
                         res.status(404).send('note not found');
                     } else {
                         const newNote = { game_id: note1.game_id, tab_id: note1.tab_id, title, contents };

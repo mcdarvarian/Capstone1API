@@ -21,7 +21,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 notebookRouter
     .route('/login')
-    //.all(requireAuth) disabled for a few bugs that havent been ironed out yet
     //this checked to make sure the logged in user exists
     .get((req, res) => {
 
