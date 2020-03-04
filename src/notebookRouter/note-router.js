@@ -42,7 +42,6 @@ notebookRouter
 notebookRouter
     .route('/user')
     .get((req, res) => {
-        console.log('hello');
         let user = req.get('authorization');
         console.log(user);
         if (!user) {
