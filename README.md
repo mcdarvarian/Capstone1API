@@ -10,8 +10,8 @@ React, CSS, Node, Express, PostgreSQL
 
 Screenshots live at: 
 ![game selection](./mainpage.png)
-![note selection](./notelist.png)
-![individual note page](./notepage.png)
+![note selection](./noteList.png)
+![individual note page](./notePage.png)
 
 Summary:
 Its a notebook for any table top role playing games you may play, designed to be quick at getting between notes, planning on adding additional features in the future but for now you can make games, and make notes within a game's tabs. Its not super complex cause I wanted to focus on speed instead
